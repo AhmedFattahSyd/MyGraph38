@@ -16,9 +16,11 @@ interface ItemViewProps {
   item: MpgItem;
   viewWidth: number;
   viewMargin: number;
+  updateItem: Function;
+  closeView: Function
 }
 interface ItemViewState {
-  item: MpgItem;
+  currentItem: MpgItem;
   itemDataChanged: boolean;
   dataSavingInProgress: boolean;
   headlineText: string;
@@ -33,7 +35,7 @@ export default class MpgItemView extends React.Component<
   constructor(props: ItemViewProps) {
     super(props);
     this.state = {
-      item: props.item,
+      currentItem: props.item,
       itemDataChanged: false,
       dataSavingInProgress: false,
       headlineText: props.item.headline,
@@ -47,11 +49,27 @@ export default class MpgItemView extends React.Component<
       : this.renderClose();
   };
 
+  handleClose = () => {
+    if (!this.state.itemDataChanged) {
+      this.props.closeView(this.state.currentItem);
+    } else {
+      // do nothing
+      // cannot close item if it has changed
+      // use delete or save it
+      // better we should disable close
+    }
+  }
+
+  handleSaveAndClose = async () => {
+    await this.updateItem();
+    this.props.closeView(this.state.currentItem);
+  };
+
   renderClose = () => {
     return (
       <div>
         <Button
-          //   onClick={() => this.handleClose()}
+            onClick={() => this.handleClose()}
           style={{
             margin: 5,
             color: MpgTheme.palette.primary.contrastText,
@@ -96,7 +114,7 @@ export default class MpgItemView extends React.Component<
           Save
         </Button>
         <Button
-          //   onClick={() => this.handleSaveAndClose()}
+            onClick={() => this.handleSaveAndClose()}
           style={{
             margin: 5,
             color: MpgTheme.palette.primary.contrastText,
@@ -186,18 +204,28 @@ export default class MpgItemView extends React.Component<
   ) => {
     state = {
       ...state,
-      item: newProps.item
+      currentItem: newProps.item,
     };
     return state;
   };
 
-  updateItem = async()=>{
-      if(this.state.itemDataChanged){
-        this.setState({})
-      }else{
-          // do nothing. data has not changed
+  updateItem = async () => {
+    try {
+      if (this.state.itemDataChanged) {
+        const item = this.state.currentItem;
+        item.headline = this.state.headlineText;
+        await this.props.updateItem(item);
+        this.setState({
+          currentItem: item,
+          itemDataChanged: false,
+        });
+      } else {
+        // do nothing. data has not changed
       }
-  }
+    } catch (error) {
+      throw error;
+    }
+  };
 
   handleHeadlineChanged = async (event: React.ChangeEvent) => {
     this.setState({
@@ -258,7 +286,7 @@ export default class MpgItemView extends React.Component<
             color: MpgTheme.palette.primary.contrastText,
           }}
         >
-          {this.state.item.getShortHeadline()}
+          {this.state.currentItem.getShortHeadline()}
         </Typography>
         {this.renderRightIcon()}
       </div>

@@ -9,9 +9,13 @@ export default class MpgViewableItem extends MpgRootItem {
   public set headline(value: string) {
     this._headline = value;
   }
-  constructor(id: string, type: MpgItemType, headline: string) {
+  constructor(
+    id: string,
+    type: MpgItemType,
+    headline: string,
+  ) {
     super(id);
-    this._type = type;
+    this._type = type
     this._headline = headline;
   }
 }

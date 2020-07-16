@@ -3,4 +3,6 @@ export enum MpgItemType {
     ViewableItem = "ViewableItem",
     Item = "Item",
     User = "User",
+    Settings = "Settings",
+    Search = "Search",
 }
